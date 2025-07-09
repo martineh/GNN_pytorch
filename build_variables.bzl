@@ -1224,6 +1224,7 @@ aten_native_source_codegen_list = [
     "aten/src/ATen/native/cpu/FusedAdagradKernel.cpp",
 ]
 
+# HMP: Add GEMM
 # This aten native source file list will not go through aten codegen process
 aten_native_source_non_codegen_list = [
     "aten/src/ATen/native/ao_sparse/library.cpp",

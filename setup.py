@@ -983,6 +983,8 @@ def configure_extension_build():
             # http://legacy.python.org/dev/peps/pep-3123/
             # We also depend on it in our code (even Python 3).
             "-fno-strict-aliasing",
+            "-L/home/martineh/workspace/transformers/GEMMLib/build/install/lib/",
+            "-lGEMM"
         ]
 
     library_dirs.append(lib_path)

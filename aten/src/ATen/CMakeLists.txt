@@ -418,6 +418,8 @@ list(APPEND ATen_CPU_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 if(BLAS_FOUND)
   list(APPEND ATen_CPU_DEPENDENCY_LIBS ${BLAS_LIBRARIES})
+  #message(${BLAS_LIBRARIES})
+  #message(FATAL_ERROR "*************************************************************************")
 endif(BLAS_FOUND)
 
 if(LAPACK_FOUND)
@@ -735,6 +737,13 @@ list(APPEND ATen_MOBILE_BENCHMARK_SRCS
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/quantize_per_channel.cpp)
 list(APPEND ATen_MOBILE_BENCHMARK_SRCS
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/stateful_conv1d.cpp)
+
+#-------------------------------------------------------------------
+#HMP: Add GEMMLib.so
+#-------------------------------------------------------------------
+list(APPEND ATen_CPU_DEPENDENCY_LIBS /home/martineh/workspace/GNN/GEMMLib/install/lib/libGEMM.so)
+#-------------------------------------------------------------------
+#-------------------------------------------------------------------
 
 # Pass source, includes, and libs to parent
 set(ATen_CORE_SRCS ${ATen_CORE_SRCS} PARENT_SCOPE)

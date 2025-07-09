@@ -16,6 +16,14 @@
 #if C10_IOS
 #include <Accelerate/Accelerate.h>
 #elif !defined(_ARMPL_H)
+
+//========================================================================================================
+// FAMILY GEMM IMPLEMENTATIONS
+//========================================================================================================
+extern "C" void family_B3A2C0(char *transa, char *transb, int *m, int *n, int *k, float *alpha, const float *a, int *lda, const float *b, int *ldb, float *beta, float *c, int *ldc);
+//========================================================================================================
+//========================================================================================================
+
 extern "C" void dgemm_(char *transa, char *transb, int *m, int *n, int *k, double *alpha, const double *a, int *lda, const double *b, int *ldb, double *beta, double *c, int *ldc);
 extern "C" void sgemm_(char *transa, char *transb, int *m, int *n, int *k, float *alpha, const float *a, int *lda, const float *b, int *ldb, float *beta, float *c, int *ldc);
 extern "C" void cgemm_(char *transa, char *transb, int *m, int *n, int *k, void *alpha, const void *a, int *lda, const void *b, int *ldb, void *beta, void *c, int *ldc);
@@ -66,6 +74,7 @@ extern "C" void zaxpy_(int *n, void *a, const void *x, int *incx, void *y, int *
 
 namespace at::native::cpublas {
 namespace internal {
+
 
 void normalize_last_dims(
     TransposeType transa, TransposeType transb,
@@ -192,6 +201,8 @@ void gemm(
 #define COMPLEX_FLOAT_CONST(a) ((const armpl_singlecomplex_t*)a)
 #endif
 
+//#define FAMILY_GEMM 1
+
 void gemm(
     TransposeType transa, TransposeType transb,
     int64_t m, int64_t n, int64_t k,
@@ -213,6 +224,16 @@ void gemm(
     #if C10_IOS
     CBLAS_TRANSPOSE transa_ = to_apple_accelerate_transpose(transa);
     CBLAS_TRANSPOSE transb_ = to_apple_accelerate_transpose(transb);
+    #ifdef FAMILY_GEMM
+    family_B3A2C0(
+        &transa_, &transb_,
+        &m_, &n_, &k_,
+        &alpha_,
+        a, &lda_,
+        b, &ldb_,
+        &beta_,
+        c, &ldc_);
+    #else
     cblas_sgemm(CblasColMajor,
       transa_, transb_,
       m_, n_, k_,
@@ -221,8 +242,20 @@ void gemm(
       b, ldb_,
       beta_,
       c, ldc_);
+    #endif
     #else
     char transa_ = to_blas(transa), transb_ = to_blas(transb);
+
+    #ifdef FAMILY_GEMM
+    family_B3A2C0(
+        &transa_, &transb_,
+        &m_, &n_, &k_,
+        &alpha_,
+        a, &lda_,
+        b, &ldb_,
+        &beta_,
+        c, &ldc_);
+    #else
     sgemm_(
         &transa_, &transb_,
         &m_, &n_, &k_,
@@ -231,6 +264,7 @@ void gemm(
         b, &ldb_,
         &beta_,
         c, &ldc_);
+    #endif
     #endif
     return;
   }
